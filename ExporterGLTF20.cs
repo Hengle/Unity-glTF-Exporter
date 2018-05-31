@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 
+using System.IO;
 using UnityEngine;
 using UnityEditor;
 
@@ -18,14 +19,18 @@ public class ExporterGLTF20 : EditorWindow {
 
     GameObject mExporterGo;
     SceneToGlTFWiz mExporter;
-    string mExportPath;
+    string mExportPath = "";
 
     Texture2D mBanner;
     string mStatus = "";
+    string mResult = "";
     GUIStyle mTextAreaStyle;
     GUIStyle mStatusStyle;
 
     private bool mExportAnimation = true;
+    private bool mExportPBR = true;
+    private bool mBuildZip = false;
+    private bool mConvertImage = true;
     private string mParamName = "";
     private string mParamDescription = "";
     private string mParamTags = "";
@@ -39,7 +44,7 @@ public class ExporterGLTF20 : EditorWindow {
 
     void OnEnable() {
         mBanner = Resources.Load<Texture2D>("ExporterBanner");
-        this.minSize = new Vector2(512, 512);
+        this.minSize = new Vector2(512, 600);
     }
 
     void OnSelectionChange() {
@@ -90,10 +95,13 @@ public class ExporterGLTF20 : EditorWindow {
         GUILayout.Space(SPACE_SIZE);
 
         GUILayout.Label("Options", EditorStyles.boldLabel);
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        mExportPBR = EditorGUILayout.Toggle("Export PBR Material", mExportPBR);
         mExportAnimation = EditorGUILayout.Toggle("Export animation (beta)", mExportAnimation);
+        mConvertImage = EditorGUILayout.Toggle("Convert Images", mConvertImage);
+        mBuildZip = EditorGUILayout.Toggle("Build Zip", mBuildZip);
         GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
 
         GUILayout.Space(SPACE_SIZE);
 
@@ -106,6 +114,9 @@ public class ExporterGLTF20 : EditorWindow {
         else
             GUILayout.Label(string.Format("<color=#F00F0FFF>{0}</color>", mStatus), mStatusStyle);
 
+        if (mResult.Length > 0)
+            GUILayout.Label(string.Format("<color=#0F0F0FFF>{0}</color>", mResult), mStatusStyle);
+
 
         GUI.enabled = enable;
         GUILayout.BeginHorizontal();
@@ -115,13 +126,16 @@ public class ExporterGLTF20 : EditorWindow {
                 EditorUtility.DisplayDialog("Error", mStatus, "Ok");
             }
             else {
-                mExporter.ExportCoroutine(mExportPath, null, true, true, mExportAnimation, true);
+                string exportFileName = Path.Combine(mExportPath, mParamName + ".gltf");
+                mExporter.ExportCoroutine(exportFileName, null, mBuildZip, mExportPBR, mExportAnimation, mConvertImage);
+                mResult = string.Format("Exort Finished: {0}", exportFileName);
             }
         }
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
 
         // Banner
+        GUILayout.Space(SPACE_SIZE);
         GUI.enabled = true;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -136,6 +150,11 @@ public class ExporterGLTF20 : EditorWindow {
         int nbSelectedObjects = Selection.GetTransforms(SelectionMode.Deep).Length;
         if (nbSelectedObjects == 0) {
             mStatus = "No object selected to export";
+            return false;
+        }
+
+        if (mExportPath.Length == 0) {
+            mStatus = "Please set export path";
             return false;
         }
 
