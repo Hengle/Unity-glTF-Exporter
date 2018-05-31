@@ -18,6 +18,7 @@ public class ExporterGLTF20 : EditorWindow {
 
     GameObject mExporterGo;
     SceneToGlTFWiz mExporter;
+    string mExportPath;
 
     Texture2D mBanner;
     string mStatus = "";
@@ -58,6 +59,15 @@ public class ExporterGLTF20 : EditorWindow {
             mStatusStyle = new GUIStyle(EditorStyles.label);
             mStatusStyle.richText = true;
         }
+
+        // Export path
+        GUILayout.Label("Export Path", EditorStyles.boldLabel);
+        GUILayout.BeginHorizontal();
+        mExportPath = EditorGUILayout.TextField(mExportPath);
+        if (GUILayout.Button("...", GUILayout.Width(48), GUILayout.Height(16))) {
+            mExportPath = EditorUtility.OpenFolderPanel("Export Path", mExportPath, "");
+        }
+        GUILayout.EndHorizontal();
 
         // Model settings
         GUILayout.Label("Model properties", EditorStyles.boldLabel);
@@ -105,9 +115,7 @@ public class ExporterGLTF20 : EditorWindow {
                 EditorUtility.DisplayDialog("Error", mStatus, "Ok");
             }
             else {
-
-                //exporter.ExportCoroutine(exportPath, null, true, true, opt_exportAnimation, true);
-
+                mExporter.ExportCoroutine(mExportPath, null, true, true, mExportAnimation, true);
             }
         }
         GUILayout.FlexibleSpace();
