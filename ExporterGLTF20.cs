@@ -21,7 +21,8 @@ public class ExporterGLTF20 : EditorWindow {
 
     Texture2D mBanner;
     string mStatus = "";
-    GUIStyle mExporterTextArea;
+    GUIStyle mTextAreaStyle;
+    GUIStyle mStatusStyle;
 
     private bool mExportAnimation = true;
     private string mParamName = "";
@@ -37,7 +38,7 @@ public class ExporterGLTF20 : EditorWindow {
 
     void OnEnable() {
         mBanner = Resources.Load<Texture2D>("ExporterBanner");
-        this.minSize = new Vector2(512, 320);
+        this.minSize = new Vector2(512, 512);
     }
 
     void OnSelectionChange() {
@@ -47,10 +48,15 @@ public class ExporterGLTF20 : EditorWindow {
 
     void OnGUI() {
 
-        if (mExporterTextArea == null) {
-            mExporterTextArea = new GUIStyle(GUI.skin.textArea);
-            mExporterTextArea.fixedWidth = DESC_SIZE.x;
-            mExporterTextArea.fixedHeight = DESC_SIZE.y;
+        if (mTextAreaStyle == null) {
+            mTextAreaStyle = new GUIStyle(GUI.skin.textArea);
+            mTextAreaStyle.fixedWidth = DESC_SIZE.x;
+            mTextAreaStyle.fixedHeight = DESC_SIZE.y;
+        }
+
+        if (mStatusStyle == null) {
+            mStatusStyle = new GUIStyle(EditorStyles.label);
+            mStatusStyle.richText = true;
         }
 
         // Model settings
@@ -64,7 +70,7 @@ public class ExporterGLTF20 : EditorWindow {
         GUILayout.Space(SPACE_SIZE);
 
         GUILayout.Label("Description");
-        mParamDescription = EditorGUILayout.TextArea(mParamDescription, mExporterTextArea);
+        mParamDescription = EditorGUILayout.TextArea(mParamDescription, mTextAreaStyle);
         GUILayout.Label("(" + mParamDescription.Length + " / 1024)", EditorStyles.centeredGreyMiniLabel);
         GUILayout.Space(SPACE_SIZE);
 
@@ -83,10 +89,18 @@ public class ExporterGLTF20 : EditorWindow {
 
         bool enable = updateExporterStatus();
 
+        GUILayout.Label("Status", EditorStyles.boldLabel);
+
+        if (enable)
+            GUILayout.Label(string.Format("<color=#0F0F0FFF>{0}</color>", mStatus), mStatusStyle);
+        else
+            GUILayout.Label(string.Format("<color=#F00F0FFF>{0}</color>", mStatus), mStatusStyle);
+
+
         GUI.enabled = enable;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button(mStatus, GUILayout.Width(220), GUILayout.Height(32))) {
+        if (GUILayout.Button("Export Selection", GUILayout.Width(220), GUILayout.Height(32))) {
             if (!enable) {
                 EditorUtility.DisplayDialog("Error", mStatus, "Ok");
             }
