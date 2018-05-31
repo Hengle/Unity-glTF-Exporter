@@ -35,16 +35,23 @@ public class ExporterGLTF20 : EditorWindow {
     private string mParamDescription = "";
     private string mParamTags = "";
 
-    void Awake() {
-        mExporterGo = new GameObject("Exporter");
-        mExporter = mExporterGo.AddComponent<SceneToGlTFWiz>();
-        //FIXME: Make sure that object is deleted;
-        mExporterGo.hideFlags = HideFlags.HideAndDontSave;
-    }
-
     void OnEnable() {
         mBanner = Resources.Load<Texture2D>("ExporterBanner");
-        this.minSize = new Vector2(512, 600);
+        this.minSize = new Vector2(512, 612);
+
+        if (mExporterGo == null) {
+            mExporterGo = new GameObject("Exporter");
+            mExporter = mExporterGo.AddComponent<SceneToGlTFWiz>();
+            mExporterGo.hideFlags = HideFlags.HideAndDontSave;
+        }
+    }
+
+    void OnDisable() {
+        if (mExporterGo != null) {
+            GameObject.DestroyImmediate(mExporterGo);
+            mExporterGo = null;
+        }
+
     }
 
     void OnSelectionChange() {
