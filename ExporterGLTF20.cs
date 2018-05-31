@@ -37,7 +37,7 @@ public class ExporterGLTF20 : EditorWindow {
 
     void OnEnable() {
         mBanner = Resources.Load<Texture2D>("ExporterBanner");
-        this.minSize = new Vector2(512, 612);
+        this.minSize = new Vector2(512, 620);
 
         if (mExporterGo == null) {
             mExporterGo = new GameObject("Exporter");
