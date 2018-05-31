@@ -8,31 +8,31 @@ using UnityEditor;
 /// </summary>
 public class ExporterGLTF20 : EditorWindow {
 
-    const int SPACE_SIZE = 5;
     // Fields limits
     const int NAME_LIMIT = 48;
     const int DESC_LIMIT = 1024;
     const int TAGS_LIMIT = 50;
-    const int PASSWORD_LIMIT = 64;
 
-    GameObject exporterGo;
-    SceneToGlTFWiz exporter;
+    const int SPACE_SIZE = 5;
+    Vector2 DESC_SIZE = new Vector2(512, 64);
+
+    GameObject mExporterGo;
+    SceneToGlTFWiz mExporter;
 
     Texture2D mBanner;
-    string status = "";
-    Vector2 descSize = new Vector2(512, 64);
-    GUIStyle exporterTextArea;
+    string mStatus = "";
+    GUIStyle mExporterTextArea;
 
-    private bool opt_exportAnimation = true;
-    private string param_name = "";
-    private string param_description = "";
-    private string param_tags = "";
+    private bool mExportAnimation = true;
+    private string mParamName = "";
+    private string mParamDescription = "";
+    private string mParamTags = "";
 
     void Awake() {
-        exporterGo = new GameObject("Exporter");
-        exporter = exporterGo.AddComponent<SceneToGlTFWiz>();
+        mExporterGo = new GameObject("Exporter");
+        mExporter = mExporterGo.AddComponent<SceneToGlTFWiz>();
         //FIXME: Make sure that object is deleted;
-        exporterGo.hideFlags = HideFlags.HideAndDontSave;
+        mExporterGo.hideFlags = HideFlags.HideAndDontSave;
     }
 
     void OnEnable() {
@@ -47,10 +47,10 @@ public class ExporterGLTF20 : EditorWindow {
 
     void OnGUI() {
 
-        if (exporterTextArea == null) {
-            exporterTextArea = new GUIStyle(GUI.skin.textArea);
-            exporterTextArea.fixedWidth = descSize.x;
-            exporterTextArea.fixedHeight = descSize.y;
+        if (mExporterTextArea == null) {
+            mExporterTextArea = new GUIStyle(GUI.skin.textArea);
+            mExporterTextArea.fixedWidth = DESC_SIZE.x;
+            mExporterTextArea.fixedHeight = DESC_SIZE.y;
         }
 
         // Model settings
@@ -58,24 +58,24 @@ public class ExporterGLTF20 : EditorWindow {
 
         // Model name
         GUILayout.Label("Name");
-        param_name = EditorGUILayout.TextField(param_name);
-        GUILayout.Label("(" + param_name.Length + "/" + NAME_LIMIT + ")", EditorStyles.centeredGreyMiniLabel);
+        mParamName = EditorGUILayout.TextField(mParamName);
+        GUILayout.Label("(" + mParamName.Length + "/" + NAME_LIMIT + ")", EditorStyles.centeredGreyMiniLabel);
         EditorStyles.textField.wordWrap = true;
         GUILayout.Space(SPACE_SIZE);
 
         GUILayout.Label("Description");
-        param_description = EditorGUILayout.TextArea(param_description, exporterTextArea);
-        GUILayout.Label("(" + param_description.Length + " / 1024)", EditorStyles.centeredGreyMiniLabel);
+        mParamDescription = EditorGUILayout.TextArea(mParamDescription, mExporterTextArea);
+        GUILayout.Label("(" + mParamDescription.Length + " / 1024)", EditorStyles.centeredGreyMiniLabel);
         GUILayout.Space(SPACE_SIZE);
 
         GUILayout.Label("Tags (separated by spaces)");
-        param_tags = EditorGUILayout.TextField(param_tags);
-        GUILayout.Label("'unity' and 'unity3D' added automatically (" + param_tags.Length + "/50)", EditorStyles.centeredGreyMiniLabel);
+        mParamTags = EditorGUILayout.TextField(mParamTags);
+        GUILayout.Label("'unity' and 'unity3D' added automatically (" + mParamTags.Length + "/50)", EditorStyles.centeredGreyMiniLabel);
         GUILayout.Space(SPACE_SIZE);
 
         GUILayout.Label("Options", EditorStyles.boldLabel);
         GUILayout.BeginHorizontal();
-        opt_exportAnimation = EditorGUILayout.Toggle("Export animation (beta)", opt_exportAnimation);
+        mExportAnimation = EditorGUILayout.Toggle("Export animation (beta)", mExportAnimation);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
 
@@ -83,17 +83,12 @@ public class ExporterGLTF20 : EditorWindow {
 
         bool enable = updateExporterStatus();
 
-        //if (enable)
-        //    GUI.color = Color.blue;
-        //else
-        //    GUI.color = Color.grey;
-
         GUI.enabled = enable;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button(status, GUILayout.Width(220), GUILayout.Height(32))) {
+        if (GUILayout.Button(mStatus, GUILayout.Width(220), GUILayout.Height(32))) {
             if (!enable) {
-                EditorUtility.DisplayDialog("Error", status, "Ok");
+                EditorUtility.DisplayDialog("Error", mStatus, "Ok");
             }
             else {
 
@@ -105,6 +100,7 @@ public class ExporterGLTF20 : EditorWindow {
         GUILayout.EndHorizontal();
 
         // Banner
+        GUI.enabled = true;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUILayout.Label(mBanner);
@@ -113,39 +109,38 @@ public class ExporterGLTF20 : EditorWindow {
     }
 
     private bool updateExporterStatus() {
-        status = "";
-
-        if (param_name.Length > NAME_LIMIT) {
-            status = "Model name is too long";
-            return false;
-        }
-
-
-        if (param_name.Length == 0) {
-            status = "Please give a name to your model";
-            return false;
-        }
-
-
-        if (param_description.Length > DESC_LIMIT) {
-            status = "Model description is too long";
-            return false;
-        }
-
-
-        if (param_tags.Length > TAGS_LIMIT) {
-            status = "Model tags are too long";
-            return false;
-        }
-
+        mStatus = "";
 
         int nbSelectedObjects = Selection.GetTransforms(SelectionMode.Deep).Length;
         if (nbSelectedObjects == 0) {
-            status = "No object selected to export";
+            mStatus = "No object selected to export";
             return false;
         }
 
-        status = "Export " + nbSelectedObjects + " object" + (nbSelectedObjects != 1 ? "s" : "");
+        if (mParamName.Length > NAME_LIMIT) {
+            mStatus = "Model name is too long";
+            return false;
+        }
+
+
+        if (mParamName.Length == 0) {
+            mStatus = "Please give a name to your model";
+            return false;
+        }
+
+
+        if (mParamDescription.Length > DESC_LIMIT) {
+            mStatus = "Model description is too long";
+            return false;
+        }
+
+
+        if (mParamTags.Length > TAGS_LIMIT) {
+            mStatus = "Model tags are too long";
+            return false;
+        }
+
+        mStatus = "Export " + nbSelectedObjects + " object" + (nbSelectedObjects != 1 ? "s" : "");
         return true;
     }
 
