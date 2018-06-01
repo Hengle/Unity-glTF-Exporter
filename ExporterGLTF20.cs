@@ -21,7 +21,6 @@ public class ExporterGLTF20 : EditorWindow {
     SceneToGlTFWiz mExporter;
     string mExportPath = "";
 
-    Texture2D mBanner;
     string mStatus = "";
     string mResult = "";
     GUIStyle mTextAreaStyle;
@@ -36,8 +35,7 @@ public class ExporterGLTF20 : EditorWindow {
     private string mParamTags = "";
 
     void OnEnable() {
-        mBanner = Resources.Load<Texture2D>("ExporterBanner");
-        this.minSize = new Vector2(512, 620);
+        this.minSize = new Vector2(400, 512);
 
         if (mExporterGo == null) {
             mExporterGo = new GameObject("Exporter");
@@ -125,6 +123,7 @@ public class ExporterGLTF20 : EditorWindow {
             GUILayout.Label(string.Format("<color=#0F0F0FFF>{0}</color>", mResult), mStatusStyle);
 
 
+        GUILayout.Space(SPACE_SIZE);
         GUI.enabled = enable;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -142,13 +141,17 @@ public class ExporterGLTF20 : EditorWindow {
         GUILayout.EndHorizontal();
 
         // Banner
-        GUILayout.Space(SPACE_SIZE);
+        GUILayout.Space(SPACE_SIZE*2);
         GUI.enabled = true;
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        GUILayout.Label(mBanner);
+        string url = "https://neil3d.github.io/app/unity-gltf-exporter.html";
+        if (GUILayout.Button("Document: "+ url, EditorStyles.helpBox)) {
+            Application.OpenURL(url);
+        }
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
+        GUILayout.Space(SPACE_SIZE * 2);
     }
 
     private bool updateExporterStatus() {
